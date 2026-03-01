@@ -2,6 +2,8 @@
 
 Welcome to the **Archive.org Robust Downloader**. This application provides a powerful, graphical, and thread-safe way to download collections and individual files from Archive.org. It is designed with enterprise-grade architecture to ensure your downloads are fast, resumable, and cryptographically verified.
 
+<img width="902" height="832" alt="screenshot" src="https://github.com/user-attachments/assets/bfbf95c3-263a-4f82-83dd-03fb8045d2b3" />
+
 ## Table of Contents
 1. [Getting Started](#getting-started)
 2. [Interface Overview](#interface-overview)
