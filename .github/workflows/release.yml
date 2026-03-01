@@ -1,0 +1,76 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*' # Workflow triggers only when pushing a tag like 'v1.0.0'
+
+jobs:
+  build-and-release:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    # Strict permission scope for security best practices
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: ArchiveDownloader-Windows-x64.zip
+            asset_content_type: application/zip
+          - os: ubuntu-20.04 # Older Ubuntu for wider glibc compatibility
+            artifact_name: ArchiveDownloader-Linux-x64.tar.gz
+            asset_content_type: application/gzip
+          - os: macos-latest
+            artifact_name: ArchiveDownloader-macOS-x64.zip
+            asset_content_type: application/zip
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' # Speeds up execution by caching pip downloads
+
+      - name: Install Linux GUI Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Execute Build Script
+        run: python build.py
+
+      - name: Package Windows / macOS (ZIP)
+        if: runner.os == 'Windows' || runner.os == 'macOS'
+        run: |
+          cd dist
+          # Compress the output directory into a ZIP archive
+          Compress-Archive -Path ArchiveDownloader -DestinationPath ../${{ matrix.artifact_name }}
+        shell: pwsh
+
+      - name: Package Linux (TAR.GZ)
+        if: runner.os == 'Linux'
+        run: |
+          cd dist
+          # Compress the output directory preserving executable permissions
+          tar -czvf ../${{ matrix.artifact_name }} ArchiveDownloader/
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.artifact_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

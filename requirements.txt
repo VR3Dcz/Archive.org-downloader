@@ -1,0 +1,5 @@
+# Core networking library for handling Archive.org API and robust downloads
+requests>=2.31.0
+
+# Build tool required for compiling the application into standalone executables (build.py)
+pyinstaller>=6.3.0
