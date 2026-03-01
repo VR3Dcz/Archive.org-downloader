@@ -3,14 +3,13 @@ name: Build and Release Binaries
 on:
   push:
     tags:
-      - 'v*' # Workflow triggers only when pushing a tag like 'v1.0.0'
+      - 'v*' # Trigger strictly on version tags
 
 jobs:
   build-and-release:
-    name: Build on ${{ matrix.os }}
+    name: Build on ${{ matrix.os_label }}
     runs-on: ${{ matrix.os }}
     
-    # Strict permission scope for security best practices
     permissions:
       contents: write
 
@@ -19,14 +18,14 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact_name: ArchiveDownloader-Windows-x64.zip
-            asset_content_type: application/zip
-          - os: ubuntu-20.04 # Older Ubuntu for wider glibc compatibility
-            artifact_name: ArchiveDownloader-Linux-x64.tar.gz
-            asset_content_type: application/gzip
+            os_label: Windows-x64
+            ext: zip
+          - os: ubuntu-22.04 # Updated to a fully supported runner
+            os_label: Linux-x64
+            ext: tar.gz
           - os: macos-latest
-            artifact_name: ArchiveDownloader-macOS-x64.zip
-            asset_content_type: application/zip
+            os_label: macOS-x64
+            ext: zip
 
     steps:
       - name: Checkout Source Code
@@ -36,7 +35,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip' # Speeds up execution by caching pip downloads
+          cache: 'pip'
 
       - name: Install Linux GUI Dependencies
         if: runner.os == 'Linux'
@@ -57,20 +56,20 @@ jobs:
         if: runner.os == 'Windows' || runner.os == 'macOS'
         run: |
           cd dist
-          # Compress the output directory into a ZIP archive
-          Compress-Archive -Path ArchiveDownloader -DestinationPath ../${{ matrix.artifact_name }}
+          # Compress using the exact version tag triggered by the user
+          Compress-Archive -Path ArchiveOrgDownloader -DestinationPath ../ArchiveOrgDownloader-${{ github.ref_name }}-${{ matrix.os_label }}.zip
         shell: pwsh
 
       - name: Package Linux (TAR.GZ)
         if: runner.os == 'Linux'
         run: |
           cd dist
-          # Compress the output directory preserving executable permissions
-          tar -czvf ../${{ matrix.artifact_name }} ArchiveDownloader/
+          # Compress the directory while preserving executable permissions
+          tar -czvf ../ArchiveOrgDownloader-${{ github.ref_name }}-${{ matrix.os_label }}.tar.gz ArchiveOrgDownloader/
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.artifact_name }}
+          files: ArchiveOrgDownloader-${{ github.ref_name }}-${{ matrix.os_label }}.${{ matrix.ext }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

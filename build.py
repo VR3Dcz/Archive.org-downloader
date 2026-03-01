@@ -11,8 +11,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-# Configuration
-APP_NAME = "ArchiveDownloader"
+# Configuration - Updated to match requested naming conventions
+APP_NAME = "ArchiveOrgDownloader"
 ENTRY_POINT = "archive_org_downloader.pyw"
 REQUIRED_PACKAGES = ["pyinstaller", "requests"]
 
@@ -25,7 +25,7 @@ def check_dependencies():
         print("[ERROR] PyInstaller is not installed.")
         print("       Please run: pip install pyinstaller")
         sys.exit(1)
-
+        
     try:
         import requests
     except ImportError:
@@ -64,30 +64,28 @@ def run_build():
         sys.exit(1)
 
     print(f"\n[INFO] Starting compilation for {sys.platform}...")
-
-    # PyInstaller arguments construction
+    
     args = [
         "pyinstaller",
         "--name", APP_NAME,
-        "--noconfirm",           # Automatically replace existing build
-        "--onedir",              # Create a one-folder bundle containing the executable
-        "--windowed",            # Prevent a console window from appearing (GUI mode)
-        "--clean",               # Clean PyInstaller cache and remove temporary files
+        "--noconfirm",           
+        "--onedir",              
+        "--windowed",            
+        "--clean",               
         ENTRY_POINT
     ]
 
     try:
-        # Execute PyInstaller safely as a subprocess
         result = subprocess.run(args, check=True, text=True)
         if result.returncode == 0:
             print(f"\n[SUCCESS] Build completed successfully!")
-
+            
             output_dir = Path("dist") / APP_NAME
             if sys.platform == "win32":
                 executable = output_dir / f"{APP_NAME}.exe"
             else:
                 executable = output_dir / APP_NAME
-
+                
             print(f"[INFO] Your compiled application is located at: {executable.absolute()}")
     except subprocess.CalledProcessError as e:
         print(f"\n[ERROR] Build process failed with exit code {e.returncode}.")
