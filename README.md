@@ -16,6 +16,9 @@ Welcome to the **Archive.org Downloader**. This application provides a powerful,
 ## Getting Started
 
 ### Using the Pre-compiled Version (Windows / macOS / Linux)
+
+Download latest release here: [![Latest Release](https://img.shields.io/github/v/release/VR3Dcz/Archive.org-downloader?color=blue&label=Latest%20Release)](https://github.com/VR3Dcz/Archive.org-downloader/releases/latest)
+
 If you downloaded a release archive (`.zip` or `.tar.gz`) from GitHub:
 1. Extract the archive to a folder on your computer.
 2. Run the `ArchiveDownloader` executable file. No installation or Python setup is required.
